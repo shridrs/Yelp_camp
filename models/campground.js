@@ -1,7 +1,5 @@
-const { default: mongoose } = require('mongoose');
-const mangoose =require('mongoose');
+const mongoose =require('mongoose');
 const Review = require('./review');
-
 const Schema=mongoose.Schema;
 
 const CampgroundSchema=new Schema({
@@ -12,7 +10,7 @@ const CampgroundSchema=new Schema({
     location:String,
     reviews:[{
         type:Schema.Types.ObjectId,
-        ref:"Review"
+        ref:'Review'
     }]
 });
 

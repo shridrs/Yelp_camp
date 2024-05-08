@@ -6,7 +6,6 @@ const session=require('express-session');
 const ExpressError=require('./utils/ExpressError');
 const methodOverride=require('method-override');
 const flash=require('connect-flash');
-
 const passport=require('passport');
 const localStratergy=require('passport-local');
 const User=require('./models/user');
@@ -28,15 +27,13 @@ db.once('open',()=>{
 
 const app=express();
 
+app.engine('ejs',ejsMate);
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'views'));
 
 app.use(express.urlencoded({extended:true}))
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname,'public')));
-app.engine('ejs',ejsMate);
-
-
 
 
 const sessionConfig={
@@ -45,7 +42,7 @@ const sessionConfig={
     saveUninitialized:true,
     cookie:{
         httpOnly:true,
-        expire:Date.now()+1000*60*60*24*7,
+        expires:Date.now()+1000*60*60*24*7,
         maxAge:1000*60*60*24*7
     }
 };
@@ -55,14 +52,17 @@ app.use(flash());
 
 app.use(passport.initialize());
 app.use(passport.session());
-
 passport.use(new localStratergy(User.authenticate()));
+
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 
 
 app.use((req,res,next)=>{
+    if(!['/login','/'].includes(req.originalUrl)){
+        req.session.returnTo=req.originalUrl;
+    }
     res.locals.currentUser=req.user;
     res.locals.success=req.flash('success');
     res.locals.error=req.flash('error');
@@ -89,7 +89,7 @@ app.all('*',(req,res,next)=>{
 
 app.use((err,req,res,next)=>{
     const {statusCode=500}=err;
-    if(!err.message) err.message='Something went wrong';
+    if(!err.message) err.message='Ohh Snap >< Something went wrong';
     res.status(statusCode).render('error',{err});
 })
 
